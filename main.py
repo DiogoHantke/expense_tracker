@@ -1,5 +1,9 @@
 import argparse, os
 
+RED    = "\033[33m"
+GREEN  = "\033[32m"
+RESET  = "\033[0m"
+
 def addExpense(args):
     ...
 
@@ -19,7 +23,7 @@ def resumeMonthExpense(args):
     ...
 
 def description():
-    print("""
+    print(RED + """
 
     ██████████████████████████████████████████████████████████████████████████████████████
     ══════════════════════════════════════════════════════════════════════════════════════
@@ -31,6 +35,11 @@ def description():
                 ╚══════╝╚═╝  ╚═╝╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚══════╝  ╚══════╝
     ██████████████████████████████████████████████████████████████████████████████████████
     ══════════════════════════════════════════════════════════════════════════════════════
+    """
+    +
+    RESET
+    +
+    """
     
     Visão Geral
     -----------
@@ -95,49 +104,43 @@ def description():
 
     =====================================================================================
     """)
+    return
 
 def main():
-    os.system('clear')
+    os.system('cls')
 
     parser = argparse.ArgumentParser(
         prog='Expense_Tracker',
+        usage='%(prog)s [options]',
         description=('''
             CLI tool for financial expense management.
-
-            Features:
-            - Add expenses
-            - Update expenses
-            - Delete expenses
-            - List expenses
-            - Generate general summary
-            - Generate monthly summary
-
             Designed for learning CLI architecture,
             data persistence and structured software design.
     ''')
     )
 
-    parser.add_argument("--add", type=str, help='adicionar uma despesa com uma descrição e quantidade')
-    parser.add_argument("--up", type=str, help='tualizar uma despesa')
-    parser.add_argument("--dl", type=str, help='excluir uma despesa')
-    parser.add_argument("--ls", type=str, help='visualizar todas as despesas')
-    parser.add_argument("--rs", type=str, help='visualizar um resumo de todas as despesas')
-    parser.add_argument("--rm", type=str, help='visualizar um resumo das despesas por um mês específico (do ano atual)')
-    parser.add_argument("--dsc", type=str, help='mostra uma descrição geral do aplicativo')
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    add_parser = subparsers.add_parser("add", help='add <descrição> <valor>')
+    add_parser.add_argument("description", type=str)
+    add_parser.add_argument("amount", type=float)
+
+    remove_parser = subparsers.add_parser("rm", help='remove <id>')
+    remove_parser.add_argument("id", type=int)
 
     args = parser.parse_args()
 
     args_list = {
-        'add' : [args.add, lambda : addExpense(args.add)],
-        'up'  : [args.up, lambda : updateExpense(args.up)],
-        'dl'  : [args.dl, lambda : deleteExpense(args.dl)],
-        'ls'  : [args.ls, lambda : viw_allExpense(args.ls)],
-        'rs'  : [args.rs, lambda : resumeAllExpense(args.rs)],
-        'rm'  : [args.rm, lambda : resumeMonthExpense(args.rm)],
-        'dsc' : [args.dsc, lambda : description()]
+        'add' : [args.command, lambda : addExpense(args)],
+        'up'  : [args.command,  lambda : updateExpense(args)],
+        'dl'  : [args.command,  lambda : deleteExpense(args)],
+        'ls'  : [args.command,  lambda : viw_allExpense(args)],
+        'rs'  : [args.command,  lambda : resumeAllExpense(args)],
+        'rm'  : [args.command,  lambda : resumeMonthExpense(args)],
+        'dsc' : [args.command, lambda : description()]
     }
-
-    args_list[[key for key, value in args_list.items() if value is not None][0]][1]
+    
+    args_list[[key for key, item in args_list.items() if item[0] is not None][0]][1]()
 
 if __name__ == '__main__':
     main()

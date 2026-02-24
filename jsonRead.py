@@ -1,10 +1,7 @@
 import json, os
+from colors import *
 
-RED    = "\033[33m"
-GREEN  = "\033[32m"
-RESET  = "\033[0m"
-
-def read_json():
+def readJson():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, "expense.json")
 
@@ -27,3 +24,10 @@ def read_json():
         with open(file_path, "w", encoding="utf-8") as file:
             json.dump({"expenses": []}, file, ensure_ascii=False, indent=2)
         return None
+
+def writeJson(dict_data = None):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(base_dir, "expense.json")
+
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(dict_data, file, ensure_ascii=False, indent=2)

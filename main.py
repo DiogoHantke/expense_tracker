@@ -3,7 +3,7 @@ from funcs import *
 
 def main():
     os.system('clear')
-
+    description()
     parser = argparse.ArgumentParser(
         prog='Expense_Tracker',
         usage='%(prog)s [options]',

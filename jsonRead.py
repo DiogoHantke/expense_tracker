@@ -23,7 +23,7 @@ def readJson():
         print(RED + "arquivo corrompido. " + RESET)
         with open(file_path, "w", encoding="utf-8") as file:
             json.dump({"expenses": []}, file, ensure_ascii=False, indent=2)
-        return None
+        return {"expenses": []}
 
 def writeJson(dict_data = None):
     base_dir = os.path.dirname(os.path.abspath(__file__))

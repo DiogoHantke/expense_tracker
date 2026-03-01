@@ -60,12 +60,6 @@ def createParser():
     add_parser.add_argument("--description", type=str, required=True, help="Descrição do registro.")
     add_parser.add_argument("--amount", type=float, required=True, help="Valor do registro (número decimal).")
 
-    add_wages_parser = subparsers.add_parser(
-        "addw",
-        help="Adiciona um registro: add [--description] [--category] [--amount]",
-        description="Cria um novo registro financeiro informando descrição, categoria e valor."
-    )
-
     remove_parser = subparsers.add_parser(
         "dl",
         help="Remove um registro pelo ID: dl <id>",
@@ -105,10 +99,6 @@ def createParser():
     return args
 
 
-def addWages(args):
-    ...
-
-
 def addExpense(args):
     data = readJson()
 
@@ -133,9 +123,13 @@ def addExpense(args):
 
     data['expenses'].append(new_data)
 
-    print(tableData(data['expenses']))
-
     writeJson(data)
+
+    if data['expenses'] != []:
+        print(tableData(data['expenses']))
+
+    else:
+        print(RED + 'não existe despesas.' + RESET)
 
     return None
 
@@ -154,9 +148,16 @@ def deleteExpense(args):
             print(RED + 'esse id não existe' + RESET)
             return
 
-        data['expenses'].pop(expenses_index)
+        data['expenses'].pop(index)
 
         writeJson(data)
+
+        if data['expenses'] != []:
+            print(tableData(data['expenses']))
+
+        else:
+            print(RED + 'não existe despesas.' + RESET)
+
         return None
 
     except IndexError:
@@ -167,9 +168,10 @@ def deleteExpense(args):
 def updateExpense(args):
     data, index = readJson(), -1
 
-    if args.amount <= 0:
-        print(RED + 'despesa negativa' + RESET)
-        return None
+    if args.amount is not None:
+        if args.amount <= 0:
+            print(RED + 'despesa negativa' + RESET)
+            return None
 
     try:
         item, index = next((item, index) for index, item in enumerate(data['expenses']) if item['id'] == args.id)
@@ -291,6 +293,7 @@ def resumeMonthExpense(args):
     return None
 
 
+
 def tableData(expenses):
     data =  []
 
@@ -306,8 +309,18 @@ def tableData(expenses):
 
 
 def graphsExpense(wage, mounths, result):
-    mounths = ['Sausage', 'Pepperoni', 'Mushrooms', 'Cheese', 'Chicken', 'Beef']
-    expenses = [14, 36, 11, 8, 7, 4]
-    wages = [100]*len(expenses)
-    plt.simple_stacked_bar(mounths, [expenses, wages], width = 50, labels = ['expenses', 'wage'], title = 'mostra os gastos mensais VS o salário')
+
+    labels = [item[0] for item in mounths]
+    expenses = [item[1] for item in mounths]
+
+    wages = [wage] * len(expenses)
+
+    plt.simple_stacked_bar(
+        labels,
+        [expenses, wages],
+        width=50,
+        labels=["expenses", "wage"],
+        title="Mostra os gastos anuais VS o salário anual"
+    )
+
     plt.show()

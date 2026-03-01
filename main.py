@@ -8,7 +8,6 @@ def main():
     args_list = {
 
         'add' : addExpense,
-        'addw': addWages,
         'up'  : updateExpense,
         'dl'  : deleteExpense,
         'ls'  : viewAllExpense,

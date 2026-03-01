@@ -65,7 +65,7 @@ def createParser():
         help="Remove um registro pelo ID: dl <id>",
         description="Exclui um registro existente informando seu identificador numérico."
     )
-    remove_parser.add_argument("--id", type=int, help="ID do registro que será removido.")
+    remove_parser.add_argument("--id", type=int, required= True, help="ID do registro que será removido.")
 
 
     view_parser = subparsers.add_parser(
@@ -93,6 +93,15 @@ def createParser():
     )
 
     resume_all_parser.add_argument("--wage", type=float, required=True, help="--wage <name>")
+
+    resume_month_parser = subparsers.add_parser(
+        "rm",
+        help="Lista registros: rs",
+        description="Exibe registros armazenados, com opções de filtro."
+    )
+
+    resume_month_parser.add_argument("--wage", type=float, required=True, help="--wage <name>")
+    resume_month_parser.add_argument("--mth", type=int, required=True, help="--mth <name>")
     
     args = parser.parse_args()
 
@@ -209,6 +218,7 @@ def updateExpense(args):
         
 def viewAllExpense(args):
     data, datas = readJson(), []
+    
     if not data['expenses']:
         print("sem despesas.")
         return None
@@ -217,21 +227,24 @@ def viewAllExpense(args):
     current_year = str(datetime.now()).split('-')[0]
     
     for expense in data['expenses']:
-        if args.mth is None and args.yr is None:
-            if (int(expense['date'].split('-')[1]) == int(current_month) and (int(expense['date'].split('-')[2]) == int(current_year))) or args.all:
+        if (args.mth is None ) and (args.yr is None) and not args.all:
+            if (int(expense['date'].split('-')[1]) == int(current_month) and (int(expense['date'].split('-')[2]) == int(current_year))):
                 datas.append(expense)
 
-        elif args.yr and (args.mth is None):
-            if int(int(expense['date'].split('-')[2]) == int(args.yr)) and int(expense['date'].split('-')[1]) == int(current_month):
+        elif args.yr and (args.mth is None) and not args.all:
+            if int(int(expense['date'].split('-')[2]) == int(args.yr)):
                 datas.append(expense)
 
-        elif args.yr is None and args.mth:
+        elif (args.yr is None) and args.mth and not args.all:
             if int(expense['date'].split('-')[1]) == int(args.mth) and (int(expense['date'].split('-')[2]) == int(current_year)):
                 datas.append(expense)
 
-        else:
+        elif args.yr and args.mth and not args.all:
             if int(expense['date'].split('-')[2]) == int(args.yr) and (int(expense['date'].split('-')[1]) == int(args.mth)):
-                datas.append(expense)
+                datas.append(expense)       
+        
+        else:
+            datas.append(expense)
 
     if datas is not None and datas != []:
         print(tableData(datas))
@@ -242,32 +255,26 @@ def viewAllExpense(args):
         
 
 def resumeAllExpense(args):
-    expenses, total = readJson(), {'2026':{}}
-    year_now = str(datetime.now()).split('-')[0]
+    expenses = readJson()
+    total = {}
 
     for item in expenses['expenses']:
 
         year = item['date'].split('-')[2]
-        date = item['date'].split('-')[1]
+        month = item['date'].split('-')[1]
 
-        if year == year_now:
-            if date in total[year_now]:
-                total[year_now][date] += item['amount']
-            else:
-                total[year_now][date] = item['amount']
+        if year not in total:
+            total[year] = {}
 
-        else:
-            if year not in total:
-                total[year] = {date: item['amount']}
-            else:
-                if date in total[year]:
-                    total[year][date] += item['amount']
-                else:
-                    total[year][date] = item['amount']
+        if month not in total[year]:
+            total[year][month] = 0
+
+        total[year][month] += item['amount']
 
     table, result = [], 0
 
     for year, mounths in total.items():
+        
         for mounth, value in mounths.items():
             table.append([mounth, value])
             result += value
@@ -276,7 +283,8 @@ def resumeAllExpense(args):
         print(tabulate(table, headers=["Month", "total"], tablefmt="rounded_grid"))
         print()
 
-        print(tabulate([[f'    {result}    ']], headers=['total anual'], tablefmt="rounded_grid"))
+        print(tabulate([[f'    {result} R$  ']], headers=['total anual'], tablefmt="rounded_grid"))
+    
         graphsExpense(args.wage, table, result)
 
         print('\n\n')
@@ -286,12 +294,69 @@ def resumeAllExpense(args):
 
 
 def resumeMonthExpense(args):
-    expeses = readJson()
+    data = readJson()
 
-    data = [items for items in expenses['expenses'] if items['data'] == args.month]
+    if not data['expenses']:
+        print("sem despesas.")
+        return None
+
+    current_year = datetime.now().year
+    selected_month = int(args.mth)
+
+    if selected_month < 1 or selected_month > 12:
+        print("Mês inválido.")
+        return None
+
+    monthly_expenses = []
+
+    for expense in data['expenses']:
+        day, month, year = expense['date'].split('-')
+
+        if int(month) == selected_month and int(year) == current_year:
+            monthly_expenses.append(expense)
+
+    if not monthly_expenses:
+        print("Nenhuma despesa encontrada para esse mês no ano atual.")
+        return None
+
+    total = sum(exp['amount'] for exp in monthly_expenses)
+
+    table = [
+        [exp['id'], exp['date'], exp['description'], exp['amount']]
+        for exp in monthly_expenses
+    ]
+
+    print(tabulate(
+        table,
+        headers=["ID", "Date", "Description", "Amount"],
+        tablefmt="rounded_grid"
+    ))
+
+    print()
+    print(tabulate(
+        [[f"{total:.2f} R$"]],
+        headers=["Total do Mês"],
+        tablefmt="rounded_grid"
+    ))
+
+    graph_data = {}
+
+    for exp in monthly_expenses:
+        day = exp['date'].split('-')[0]
+
+        if day not in graph_data:
+            graph_data[day] = 0
+
+        graph_data[day] += exp['amount']
+
+    graph_table = sorted(
+        [(day, value) for day, value in graph_data.items()],
+        key=lambda x: int(x[0])
+    )
+
+    graphsExpense(args.wage, graph_table, total)
 
     return None
-
 
 
 def tableData(expenses):
@@ -309,15 +374,18 @@ def tableData(expenses):
 
 
 def graphsExpense(wage, mounths, result):
-
     labels = [item[0] for item in mounths]
     expenses = [item[1] for item in mounths]
 
-    wages = [wage] * len(expenses)
+    wages_final = [wage - expense for expense in expenses if wage > expense]
 
+    if(wages_final == []):
+        print(RED + "os gastos são maiores que o sálario colocado." + RESET)
+        return
+    
     plt.simple_stacked_bar(
         labels,
-        [expenses, wages],
+        [expenses, wages_final],
         width=50,
         labels=["expenses", "wage"],
         title="Mostra os gastos anuais VS o salário anual"

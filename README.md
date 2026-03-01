@@ -228,39 +228,87 @@ python main.py &lt;comando&gt; [argumentos]
 </code></pre>
 
 <hr>
+<hr>
 
 <h2>Exemplos de Uso</h2>
 
 <h3>Adicionar despesa</h3>
 
-<pre><code>
-python main.py add --description "Lunch" --amount 25
-</code></pre>
+<code>python main.py add --description "Lunch" --amount 25</code>
 
-<h3>Listar despesas</h3>
+<br><br>
+<img src="assets/add_terminal.png" alt="Add command output" width="700">
+<br><br>
 
-<pre><code>
-python main.py ls
-</code></pre>
-
-<h3>Atualizar despesa</h3>
-
-<pre><code>
-python main.py up --id 1 --amount 40
-</code></pre>
+<hr>
 
 <h3>Excluir despesa</h3>
 
-<pre><code>
-python main.py dl --id 1
-</code></pre>
+<code>python main.py dl --id 1</code>
+
+<br><br>
+<img src="assets/del_terminal.png" alt="Delete command output" width="700">
+<br><br>
+
+<hr>
+
+<h3>Listar despesas (mês atual)</h3>
+
+<code>python main.py ls</code>
+
+<br><br>
+<img src="assets/ls_mth_terminal.png" alt="List month output" width="700">
+<br><br>
+
+<hr>
+
+<h3>Listar despesas por ano</h3>
+
+<code>python main.py ls --yr 2026</code>
+
+<br><br>
+<img src="assets/ls_yr_terminal.png" alt="List year output" width="700">
+<br><br>
+
+<hr>
+
+<h3>Atualizar despesa</h3>
+
+<code>python main.py up --id 1 --amount 40</code>
+
+<br><br>
+<img src="assets/up_terminal.png" alt="Update command output" width="700">
+<br><br>
+
+<hr>
 
 <h3>Resumo anual com gráfico</h3>
 
-<pre><code>
-python main.py rs --wage 5000
-</code></pre>
+<code>python main.py rs --wage 5000</code>
 
+<br><br>
+<img src="assets/rs_terminal.png" alt="Resume annual output" width="700">
+<br><br>
+
+<hr>
+
+<h3>Resumo mensal com gráfico</h3>
+
+<code>python main.py rm --mth 2 --wage 5000</code>
+
+<br><br>
+<img src="assets/rm_terminal.png" alt="Resume month output" width="700">
+<br><br>
+
+<hr>
+
+<h3>Ajuda</h3>
+
+<code>python main.py --help</code>
+
+<br><br>
+<img src="assets/help_terminal.png" alt="Help output" width="700">
+<br><br>
 <hr>
 
 <h2>Decisões de Projeto</h2>

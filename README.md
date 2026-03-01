@@ -1,21 +1,15 @@
 <h1>Expense Tracker CLI</h1>
 
 <p>
-Expense Tracker é um <strong>gerenciador de despesas via linha de comando (CLI)</strong>,
-desenvolvido como projeto educacional para praticar fundamentos de engenharia de software,
-incluindo manipulação de argumentos, persistência de dados, organização modular e geração de relatórios.
+Expense Tracker é uma aplicação de linha de comando (CLI) desenvolvida em Python
+para gerenciamento de despesas pessoais, com persistência de dados em arquivo JSON,
+listagem formatada em tabela e geração de relatórios financeiros.
 </p>
 
 <p>
-O aplicativo permite registrar despesas com descrição, valor e data, visualizar listagens formatadas,
-gerar resumos gerais e resumos mensais, onde contém gráficos de despesa baseados no salário cadastrado.
+O sistema permite adicionar, atualizar, excluir e visualizar despesas,
+além de gerar resumos anuais e comparações gráficas entre gastos e salário.
 </p>
-
-<h2>Demonstração</h2>
-
-<p>GIF de demonstração do uso do CLI:</p>
-
-<img src="assets/demo.gif" alt="Demonstração do Expense Tracker CLI">
 
 <hr>
 
@@ -29,61 +23,184 @@ Roadmap.sh - Expense Tracker Project
 </p>
 
 <blockquote>
-Crie um aplicativo de rastreamento de despesas simples para gerenciar suas finanças.
-O aplicativo deve permitir que os usuários adicionem, excluam e visualizem suas despesas.
-A aplicação também deve fornecer um resumo das despesas.
+Criar uma aplicação de rastreamento de despesas que permita adicionar,
+remover e visualizar despesas, além de gerar resumos financeiros.
 </blockquote>
 
-<p>Requisitos principais:</p>
+<p>Requisitos implementados:</p>
 
 <ul>
-    <li>Executar a partir da linha de comando.</li>
+    <li>Execução via linha de comando.</li>
     <li>Adicionar despesas com descrição e valor.</li>
     <li>Atualizar despesas existentes.</li>
-    <li>Excluir despesas.</li>
-    <li>Visualizar todas as despesas.</li>
-    <li>Visualizar resumo geral.</li>
-    <li>Visualizar resumo por mês do ano atual.</li>
+    <li>Excluir despesas por ID.</li>
+    <li>Listar despesas com filtros por mês e ano.</li>
+    <li>Gerar resumo anual.</li>
+    <li>Gerar gráfico comparando despesas e salário.</li>
 </ul>
 
+<hr>
+
+<h2>Estrutura do Projeto</h2>
+
+<pre><code>
+.
+├── main.py
+├── expense.json
+├── colors.py
+└── README.md
+</code></pre>
+
+<hr>
+
+<h2>Funcionalidades e Lógica Interna</h2>
+
+<h3>readJson()</h3>
+
 <p>
-O projeto faz parte dos exercícios educacionais disponíveis na
-<a href="https://roadmap.sh" target="_blank">Roadmap.sh</a>,
-plataforma de aprendizado voltada ao desenvolvimento de software.
+Responsável por carregar os dados do arquivo JSON.
+Caso o arquivo não exista, ele é criado automaticamente.
+Também trata possíveis erros de corrupção do arquivo.
+</p>
+
+<p>
+Função central de persistência do sistema.
 </p>
 
 <hr>
 
-<h2>Funcionalidades</h2>
+<h3>writeJson(dict_data)</h3>
+
+<p>
+Responsável por salvar os dados atualizados no arquivo JSON.
+É utilizada após operações de adição, atualização ou exclusão.
+</p>
+
+<hr>
+
+<h3>createParser()</h3>
+
+<p>
+Define a interface da aplicação utilizando <code>argparse</code>.
+Configura os subcomandos disponíveis:
+</p>
 
 <ul>
-    <li>Operação exclusiva via CLI</li>
-    <li>Persistência de dados em arquivo JSON</li>
-    <li>Listagem de despesas em formato tabular</li>
-    <li>Resumo financeiro geral</li>
-    <li>Resumo financeiro mensal</li>
-    <li>Estrutura preparada para gráficos no terminal</li>
+    <li>add</li>
+    <li>addw</li>
+    <li>dl</li>
+    <li>ls</li>
+    <li>up</li>
+    <li>rs</li>
 </ul>
 
-<p>Cada despesa pode conter:</p>
+<p>
+A função retorna os argumentos processados para serem utilizados
+pelas funções correspondentes.
+</p>
+
+<hr>
+
+<h3>addExpense(args)</h3>
+
+<p>
+Adiciona uma nova despesa ao sistema.
+</p>
+
+<p>
+Etapas internas:
+</p>
 
 <ul>
-    <li>ID único</li>
-    <li>Descrição</li>
-    <li>Valor</li>
-    <li>Data de registro</li>
-    <li>Categoria (opcional)</li>
+    <li>Validação de valor positivo.</li>
+    <li>Geração automática de ID incremental.</li>
+    <li>Registro da data atual.</li>
+    <li>Inserção no JSON.</li>
+    <li>Exibição da tabela atualizada.</li>
 </ul>
 
 <hr>
 
-<h2>Tecnologias utilizadas</h2>
+<h3>deleteExpense(args)</h3>
+
+<p>
+Remove uma despesa com base no ID informado.
+Caso o ID não exista, uma mensagem de erro é exibida.
+</p>
+
+<hr>
+
+<h3>updateExpense(args)</h3>
+
+<p>
+Permite atualizar descrição e/ou valor de uma despesa.
+</p>
+
+<p>
+Antes de aplicar a alteração, o sistema:
+</p>
+
+<ul>
+    <li>Exibe o registro atual.</li>
+    <li>Mostra as modificações destacadas.</li>
+    <li>Solicita confirmação do usuário.</li>
+</ul>
+
+<hr>
+
+<h3>viewAllExpense(args)</h3>
+
+<p>
+Lista as despesas cadastradas.
+Permite filtros por mês, ano ou visualização completa.
+Caso nenhum filtro seja informado, exibe o mês e ano atual.
+</p>
+
+<hr>
+
+<h3>resumeAllExpense(args)</h3>
+
+<p>
+Gera o resumo financeiro anual.
+</p>
+
+<p>
+A função:
+</p>
+
+<ul>
+    <li>Agrupa despesas por ano e mês.</li>
+    <li>Calcula o total mensal.</li>
+    <li>Calcula o total anual.</li>
+    <li>Exibe tabela formatada.</li>
+    <li>Gera gráfico comparando despesas com salário.</li>
+</ul>
+
+<hr>
+
+<h3>graphsExpense()</h3>
+
+<p>
+Responsável por gerar gráficos no terminal utilizando a biblioteca
+<code>plotext</code>.
+</p>
+
+<p>
+O gráfico compara os valores de despesas mensais com o salário informado.
+</p>
+
+<hr>
+
+<h2>Tecnologias Utilizadas</h2>
 
 <ul>
     <li>Python 3</li>
-    <li>Módulos nativos: <code>argparse</code>, <code>json</code>, <code>os</code></li>
-    <li><code>tabulate</code> para exibição formatada de tabelas</li>
-    <li>Biblioteca opcional para gráficos no terminal (ex: <code>plotext</code>)</li>
+    <li>argparse</li>
+    <li>json</li>
+    <li>os</li>
+    <li>datetime</li>
+    <li>tabulate</li>
+    <li>plotext</li>
 </ul>
 
 <hr>
@@ -95,43 +212,16 @@ git clone https://github.com/seu-usuario/expense-tracker.git
 cd expense-tracker
 </code></pre>
 
-<p>Instale as dependências:</p>
+<p>Instalar dependências:</p>
 
 <pre><code>
 pip install tabulate
-</code></pre>
-
-<p>Se utilizar gráficos no terminal:</p>
-
-<pre><code>
 pip install plotext
 </code></pre>
 
-<p>Para visualizar os comandos disponíveis:</p>
-
-<pre><code>
-python main.py --help
-</code></pre>
-
 <hr>
 
-<h2>Estrutura do projeto</h2>
-
-<pre><code>
-.
-├── main.py
-├── storage.py
-├── analytics.py
-├── data/
-│   └── expenses.json
-├── assets/
-│   └── demo.gif
-└── README.md
-</code></pre>
-
-<hr>
-
-<h2>Como executar</h2>
+<h2>Como Executar</h2>
 
 <pre><code>
 python main.py &lt;comando&gt; [argumentos]
@@ -139,76 +229,71 @@ python main.py &lt;comando&gt; [argumentos]
 
 <hr>
 
-<h2>Comandos disponíveis</h2>
+<h2>Exemplos de Uso</h2>
 
 <h3>Adicionar despesa</h3>
-<pre><code>
-python main.py add "Descrição" 25.50
-</code></pre>
 
-<h3>Atualizar despesa</h3>
 <pre><code>
-python main.py update 1 "Nova descrição" 30.00
-</code></pre>
-
-<h3>Excluir despesa</h3>
-<pre><code>
-python main.py delete 1
+python main.py add --description "Lunch" --amount 25
 </code></pre>
 
 <h3>Listar despesas</h3>
+
 <pre><code>
-python main.py list
+python main.py ls
 </code></pre>
 
-<h3>Resumo geral</h3>
+<h3>Atualizar despesa</h3>
+
 <pre><code>
-python main.py summary
+python main.py up --id 1 --amount 40
 </code></pre>
 
-<h3>Resumo mensal</h3>
+<h3>Excluir despesa</h3>
+
 <pre><code>
-python main.py monthly &lt;mês&gt;
+python main.py dl --id 1
+</code></pre>
+
+<h3>Resumo anual com gráfico</h3>
+
+<pre><code>
+python main.py rs --wage 5000
 </code></pre>
 
 <hr>
 
-<h2>Decisões de projeto</h2>
+<h2>Decisões de Projeto</h2>
 
 <ul>
-    <li><strong>Arquitetura modular:</strong> separação entre interface CLI, persistência e análise de dados.</li>
-    <li><strong>Persistência em JSON:</strong> formato simples, legível e portável.</li>
-    <li><strong>Exibição tabular:</strong> uso de tabulate para melhor legibilidade no terminal.</li>
-    <li><strong>Extensibilidade:</strong> estrutura preparada para futuras funcionalidades como gráficos e categorias.</li>
+    <li>Persistência baseada em JSON.</li>
+    <li>Arquitetura funcional modular.</li>
+    <li>Separação entre manipulação de dados e exibição.</li>
+    <li>Uso de IDs automáticos.</li>
+    <li>Validação básica de entrada.</li>
+    <li>Geração de relatórios em tabela e gráfico.</li>
 </ul>
 
 <hr>
 
-<h2>Melhorias futuras</h2>
+<h2>Melhorias Futuras</h2>
 
 <ul>
-    <li>Sistema completo de categorias</li>
-    <li>Controle de orçamento mensal</li>
-    <li>Exportação para CSV</li>
-    <li>Gráficos diretamente no terminal</li>
-    <li>Testes automatizados</li>
-    <li>Refatoração orientada a objetos</li>
+    <li>Separação em módulos.</li>
+    <li>Implementação de banco SQLite.</li>
+    <li>Testes automatizados.</li>
+    <li>Sistema de categorias.</li>
+    <li>Controle de orçamento mensal.</li>
+    <li>Exportação para CSV.</li>
+    <li>Refatoração orientada a objetos.</li>
 </ul>
 
 <hr>
 
-<h2>Objetivo educacional</h2>
+<h2>Objetivo Educacional</h2>
 
 <p>
 Projeto desenvolvido para consolidar conhecimentos em lógica de programação,
-manipulação de arquivos, desenvolvimento de aplicações CLI e organização de código,
-seguindo desafios propostos pela plataforma Roadmap.sh.
-</p>
-
-<hr>
-
-<h2>Licença</h2>
-
-<p>
-Projeto livre para estudo, modificação e uso educacional.
+manipulação de arquivos, desenvolvimento de aplicações CLI,
+organização de código e geração de relatórios financeiros.
 </p>

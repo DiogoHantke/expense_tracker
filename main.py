@@ -6,12 +6,15 @@ def main():
     args = createParser()
 
     args_list = {
+
         'add' : addExpense,
+        'addw': addWages,
         'up'  : updateExpense,
         'dl'  : deleteExpense,
         'ls'  : viewAllExpense,
         'rs'  : resumeAllExpense,
         'rm'  : resumeMonthExpense
+
     }
 
     result_func = args_list[args.command](args)

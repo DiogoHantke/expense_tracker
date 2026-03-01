@@ -2,6 +2,7 @@ from colors import *
 from datetime import datetime
 from tabulate import tabulate
 import argparse, os, json
+import plotext as plt
 
 def readJson():
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -24,8 +25,9 @@ def readJson():
         
         print(RED + "arquivo corrompido. " + RESET)
         with open(file_path, "w", encoding="utf-8") as file:
-            json.dump({"expenses": []}, file, ensure_ascii=False, indent=2)
-        return {"expenses": []}
+            json.dump({"expenses":[]}, file, ensure_ascii=False, indent=2)
+        return {"expenses":[]}
+
 
 def writeJson(dict_data = None):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -33,6 +35,8 @@ def writeJson(dict_data = None):
 
     with open(file_path, 'w', encoding='utf-8') as file:
         json.dump(dict_data, file, ensure_ascii=False, indent=2)
+    
+    return None
     
 
 def createParser():
@@ -50,12 +54,17 @@ def createParser():
 
     add_parser = subparsers.add_parser(
         "add",
-        help="Adiciona um registro: add [--description] <description> [--category] <category> [--amount] <amount>",
+        help="Adiciona um registro: add [--description] [--category] [--amount]",
         description="Cria um novo registro financeiro informando descrição, categoria e valor."
     )
     add_parser.add_argument("--description", type=str, required=True, help="Descrição do registro.")
     add_parser.add_argument("--amount", type=float, required=True, help="Valor do registro (número decimal).")
 
+    add_wages_parser = subparsers.add_parser(
+        "addw",
+        help="Adiciona um registro: add [--description] [--category] [--amount]",
+        description="Cria um novo registro financeiro informando descrição, categoria e valor."
+    )
 
     remove_parser = subparsers.add_parser(
         "dl",
@@ -72,6 +81,7 @@ def createParser():
     )
     view_parser.add_argument("--all", action="store_true", help="Mostra todos os registros, sem filtros.")
     view_parser.add_argument("--mth", type=int, help="Filtra registros por mês (1 a 12).")
+    view_parser.add_argument("--yr", type=int, help="Filtra registros por ano.")
 
     update_parser = subparsers.add_parser(
         "up",
@@ -82,13 +92,29 @@ def createParser():
     update_parser.add_argument("--description", type=str, help="--description <description>")
     update_parser.add_argument("--amount", type=float, help="--amount <amount>")
 
+    resume_all_parser = subparsers.add_parser(
+        "rs",
+        help="Lista registros: rs",
+        description="Exibe registros armazenados, com opções de filtro."
+    )
+
+    resume_all_parser.add_argument("--wage", type=float, required=True, help="--wage <name>")
+    
     args = parser.parse_args()
 
     return args
 
 
+def addWages(args):
+    ...
+
+
 def addExpense(args):
     data = readJson()
+
+    if args.amount <= 0:
+        print(RED + 'despesa com valor negativo' + RESET)
+        return None
 
     try:
         new_id = max(expense.get("id", 0) for expense in data["expenses"]) + 1
@@ -100,15 +126,18 @@ def addExpense(args):
 
     new_data = {
         'id': new_id,
+        'date': date,
         'description': args.description,
-        'amount': '%.2f R$' % args.amount,
-        'date': date
+        'amount': args.amount
     }
 
     data['expenses'].append(new_data)
 
     print(tableData(data['expenses']))
+
     writeJson(data)
+
+    return None
 
 
 def deleteExpense(args):
@@ -118,22 +147,29 @@ def deleteExpense(args):
         return None
 
     try:
-        expenses_index = [
-            index
-            for index, expense in enumerate(data["expenses"])
-            if expense.get('id', 0) == expense_id
-        ][0]
+        for index, expense in enumerate(data["expenses"]):
+            if expense["id"] == expense_id:
+                break
+        else:
+            print(RED + 'esse id não existe' + RESET)
+            return
 
         data['expenses'].pop(expenses_index)
 
         writeJson(data)
+        return None
 
     except IndexError:
         print(RED + 'esse id não existe' + RESET)
+        return None
 
 
 def updateExpense(args):
     data, index = readJson(), -1
+
+    if args.amount <= 0:
+        print(RED + 'despesa negativa' + RESET)
+        return None
 
     try:
         item, index = next((item, index) for index, item in enumerate(data['expenses']) if item['id'] == args.id)
@@ -145,9 +181,9 @@ def updateExpense(args):
 
     dataUp = {
         'id' : item['id'],
+        'date' : item['date'],
         'description' : args.description if args.description is not None else item['description'],
-        'amount' : '%.2f R$' % args.amount if args.amount is not None else item['amount'],
-        'date' : item['date']
+        'amount' : args.amount if args.amount is not None and args.amount > 0 else item['amount']
     }
 
     printData, keys = dataUp.copy(), dataUp.keys()
@@ -158,56 +194,120 @@ def updateExpense(args):
 
     print(f'\nessa despesa será a alteração, certeza que quer alterar o dado ?\n{tableData([printData])}')
     
-    if int(input('0 - Não\n1 - sim\n\n')) is not 0:
+    if int(input('0 - Não\n1 - sim\n\n')) != 0:
         data['expenses'][index] = dataUp
         writeJson(data)
         print(f'despesa alterada com sucesso. \n\n{tableData([dataUp])}')
 
     else:
         print(f'despesa mantida. \n\n{tableData([item])}')
+    
+    return None
 
         
 def viewAllExpense(args):
     data, datas = readJson(), []
-
     if not data['expenses']:
         print("sem despesas.")
         return None
 
     current_month = str(datetime.now()).split('-')[1]
+    current_year = str(datetime.now()).split('-')[0]
     
     for expense in data['expenses']:
-        if not args.mth:
-            if int(expense['date'].split('-')[1]) == int(current_month) or args.all:
-                datas.append(expense)
-        else:
-            if int(expense['date'].split('-')[1]) == args.mth:
+        if args.mth is None and args.yr is None:
+            if (int(expense['date'].split('-')[1]) == int(current_month) and (int(expense['date'].split('-')[2]) == int(current_year))) or args.all:
                 datas.append(expense)
 
-    print(tableData(datas))
+        elif args.yr and (args.mth is None):
+            if int(int(expense['date'].split('-')[2]) == int(args.yr)) and int(expense['date'].split('-')[1]) == int(current_month):
+                datas.append(expense)
+
+        elif args.yr is None and args.mth:
+            if int(expense['date'].split('-')[1]) == int(args.mth) and (int(expense['date'].split('-')[2]) == int(current_year)):
+                datas.append(expense)
+
+        else:
+            if int(expense['date'].split('-')[2]) == int(args.yr) and (int(expense['date'].split('-')[1]) == int(args.mth)):
+                datas.append(expense)
+
+    if datas is not None and datas != []:
+        print(tableData(datas))
+    else:
+        print(RED + 'essa data não existe' + RESET)
 
     return None
         
 
 def resumeAllExpense(args):
-    ...
+    expenses, total = readJson(), {'2026':{}}
+    year_now = str(datetime.now()).split('-')[0]
+
+    for item in expenses['expenses']:
+
+        year = item['date'].split('-')[2]
+        date = item['date'].split('-')[1]
+
+        if year == year_now:
+            if date in total[year_now]:
+                total[year_now][date] += item['amount']
+            else:
+                total[year_now][date] = item['amount']
+
+        else:
+            if year not in total:
+                total[year] = {date: item['amount']}
+            else:
+                if date in total[year]:
+                    total[year][date] += item['amount']
+                else:
+                    total[year][date] = item['amount']
+
+    table, result = [], 0
+
+    for year, mounths in total.items():
+        for mounth, value in mounths.items():
+            table.append([mounth, value])
+            result += value
+
+        print(tabulate([[f'       {year}      ']], headers=["year"], tablefmt="rounded_grid"))
+        print(tabulate(table, headers=["Month", "total"], tablefmt="rounded_grid"))
+        print()
+
+        print(tabulate([[f'    {result}    ']], headers=['total anual'], tablefmt="rounded_grid"))
+        graphsExpense(args.wage, table, result)
+
+        print('\n\n')
+        
+        table = []
+        result = 0
 
 
 def resumeMonthExpense(args):
-    ...
+    expeses = readJson()
+
+    data = [items for items in expenses['expenses'] if items['data'] == args.month]
+
+    return None
 
 
 def tableData(expenses):
     data =  []
 
     for index, item in enumerate(expenses):
-        data.append(expenses[index].values())
+        expense = list(item.values())
+        expense[len(expense)-1] = f'{expense[-1:][0]} R$'
+        data.append(expense)
 
-    headers = ["id", "description", "amount", "date"]
+    headers = ["id", "date","description", "amount"]
     table = tabulate(data, headers=headers, tablefmt="rounded_grid")
 
     return table
 
 
-def graphsExpense():
-    ...
+def graphsExpense(wage, mounths, result):
+    mounths = ['Sausage', 'Pepperoni', 'Mushrooms', 'Cheese', 'Chicken', 'Beef']
+    expenses = [14, 36, 11, 8, 7, 4]
+    wages = [100]*len(expenses)
+    plt.simple_stacked_bar(mounths, [expenses, wages], width = 50, labels = ['expenses', 'wage'], title = 'mostra os gastos mensais VS o salário')
+    plt.show()

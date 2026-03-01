@@ -8,7 +8,7 @@ incluindo manipulação de argumentos, persistência de dados, organização mod
 
 <p>
 O aplicativo permite registrar despesas com descrição, valor e data, visualizar listagens formatadas,
-gerar resumos gerais e resumos mensais, além de suportar extensões futuras como categorias e gráficos no terminal.
+gerar resumos gerais e resumos mensais, onde contém gráficos de despesa baseados no salário cadastrado.
 </p>
 
 <h2>Demonstração</h2>

@@ -1,4 +1,4 @@
-from colors import *
+from .colors import *
 from datetime import datetime
 from tabulate import tabulate
 import argparse, os, json
@@ -79,8 +79,8 @@ def createParser():
 
     update_parser = subparsers.add_parser(
         "up",
-        help="Lista registros: up [--id] [--description]",
-        description="Exibe registros armazenados, com opções de filtro."
+        help="atualiza registros: up [--id] [--description]",
+        description="atualiza uma despesa específica."
     )
     update_parser.add_argument("--id", type=int, required=True, help="--id <id>")
     update_parser.add_argument("--description", type=str, help="--description <description>")
@@ -88,20 +88,20 @@ def createParser():
 
     resume_all_parser = subparsers.add_parser(
         "rs",
-        help="Lista registros: rs",
-        description="Exibe registros armazenados, com opções de filtro."
+        help="resume despesas de todos os anos: rs [--wage]",
+        description="Exibe gráficos para melhor leitura"
     )
 
-    resume_all_parser.add_argument("--wage", type=float, required=True, help="--wage <name>")
+    resume_all_parser.add_argument("--wage", type=float, required=True, help="--wage <wage>")
 
     resume_month_parser = subparsers.add_parser(
         "rm",
-        help="Lista registros: rs",
+        help="Resume as despesas do mês especificado do ano corrente: rm [--mth] [--wage]",
         description="Exibe registros armazenados, com opções de filtro."
     )
 
-    resume_month_parser.add_argument("--wage", type=float, required=True, help="--wage <name>")
-    resume_month_parser.add_argument("--mth", type=int, required=True, help="--mth <name>")
+    resume_month_parser.add_argument("--wage", type=float, required=True, help="--wage <wage>")
+    resume_month_parser.add_argument("--mth", type=int, required=True, help="--mth <month> filtra o resumo por meses do ano corrente")
     
     args = parser.parse_args()
 
@@ -203,7 +203,7 @@ def updateExpense(args):
         if dataUp[key] !=  item[key]:
             printData[key] = RED + f'{dataUp[key]}' + RESET
 
-    print(f'\nessa despesa será a alteração, certeza que quer alterar o dado ?\n{tableData([printData])}')
+    print(f'\nesses dados serão alterados, tem certeza que quer alterar o dado ?\n{tableData([printData])}')
     
     if int(input('0 - Não\n1 - sim\n\n')) != 0:
         data['expenses'][index] = dataUp
@@ -386,7 +386,7 @@ def graphsExpense(wage, mounths, result):
     plt.simple_stacked_bar(
         labels,
         [expenses, wages_final],
-        width=50,
+        width=40,
         labels=["expenses", "wage"],
         title="Mostra os gastos anuais VS o salário anual"
     )

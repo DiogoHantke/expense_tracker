@@ -1,4 +1,4 @@
-from funcs import *
+from .funcs import *
 
 def main():
     os.system('clear') if os.name != 'nt' else os.system('cls')

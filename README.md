@@ -141,7 +141,7 @@ python main.py &lt;comando&gt; [argumentos]
 <code>exp add --description "Lunch" --amount 25</code>
 
 <br><br>
-<img src="assets/add_terminal.png" width="700">
+<p align = "center"><img src="assets/add_terminal.png" width="700"> </p>
 <br><br>
 
 <hr>
@@ -151,7 +151,7 @@ python main.py &lt;comando&gt; [argumentos]
 <code>exp dl --id 1</code>
 
 <br><br>
-<img src="assets/del_terminal.png" width="700">
+<p align = "center"><img src="assets/del_terminal.png" width="700"></p>
 <br><br>
 
 <hr>
@@ -161,7 +161,7 @@ python main.py &lt;comando&gt; [argumentos]
 <code>exp ls</code>
 
 <br><br>
-<img src="assets/ls_mth_terminal.png" width="700">
+<p align = "center"><img src="assets/ls_mth_terminal.png" width="700"></p>
 <br><br>
 
 <hr>
@@ -171,7 +171,7 @@ python main.py &lt;comando&gt; [argumentos]
 <code>exp up --id 1 --amount 40</code>
 
 <br><br>
-<img src="assets/up_terminal.png" width="700">
+<p align = "center"><img src="assets/up_terminal.png" width="700"></p>
 <br><br>
 
 <hr>
@@ -181,7 +181,7 @@ python main.py &lt;comando&gt; [argumentos]
 <code>exp rs --wage 5000</code>
 
 <br><br>
-<img src="assets/rs_terminal.png" width="700">
+<p align = "center"><img src="assets/rs_terminal.png" width="700"></p>
 <br><br>
 
 <hr>
@@ -191,7 +191,7 @@ python main.py &lt;comando&gt; [argumentos]
 <code>exp rm --mth 2 --wage 5000</code>
 
 <br><br>
-<img src="assets/rm_terminal.png" width="700">
+<p align = "center"><img src="assets/rm_terminal.png" width="700"></p>
 <br><br>
 
 <hr>
@@ -201,7 +201,7 @@ python main.py &lt;comando&gt; [argumentos]
 <code>exp --help</code>
 
 <br><br>
-<img src="assets/help_terminal.png" width="700">
+<p align = "center"><img src="assets/help_terminal.png" width="700"></p>
 <br><br>
 
 <hr>
